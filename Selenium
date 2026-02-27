@@ -1,0 +1,12 @@
+Selenium Automation Project – SauceDemo Testing
+I built an automation test script using Python + Selenium WebDriver to validate core functionalities of the SauceDemo application (https://www.saucedemo.com).
+Features Automated:
+✅ Login Validation – Verified successful login with valid credentials
+✅ Add to Cart – Added product and validated cart badge update
+✅ Checkout Flow – Completed purchase and verified confirmation message
+✅ Logout Functionality – Ensured user is redirected back to login page
+Tech Stack:
+•	Python
+•	Selenium WebDriver
+•	WebDriverWait (Explicit Waits)
+•	ChromeDriver (via webdriver-manager)
