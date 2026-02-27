@@ -10,3 +10,124 @@ Tech Stack:
 •	Selenium WebDriver
 •	WebDriverWait (Explicit Waits)
 •	ChromeDriver (via webdriver-manager)
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
+
+URL = "https://www.saucedemo.com/"
+USERNAME = "standard_user"
+PASSWORD = "secret_sauce"
+
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+wait = WebDriverWait(driver, 15)
+
+# --------------------------
+# LOGIN FUNCTION
+# --------------------------
+def login():
+    driver.get(URL)
+
+    wait.until(EC.presence_of_element_located((By.ID, "user-name"))).send_keys(USERNAME)
+    driver.find_element(By.ID, "password").send_keys(PASSWORD)
+    driver.find_element(By.ID, "login-button").click()
+
+    # Confirm inventory page loaded
+    wait.until(EC.presence_of_element_located((By.CLASS_NAME, "inventory_list")))
+
+# --------------------------
+# TEST 1: LOGIN
+# --------------------------
+def test_login():
+    login()
+    assert "inventory" in driver.current_url
+    print("✅ Test 1 Passed: Login successful")
+
+# --------------------------
+# TEST 2: ADD TO CART
+# --------------------------
+def test_add_to_cart():
+    login()
+
+    # Click Add to Cart
+    wait.until(
+        EC.element_to_be_clickable((By.ID, "add-to-cart-sauce-labs-backpack"))
+    ).click()
+
+    # Confirm button changed to Remove (means item added)
+    wait.until(
+        EC.presence_of_element_located((By.ID, "remove-sauce-labs-backpack"))
+    )
+
+    # Confirm cart count updated
+    wait.until(
+        lambda d: d.find_element(By.CLASS_NAME, "shopping_cart_badge").text == "1"
+    )
+
+    cart_count = driver.find_element(By.CLASS_NAME, "shopping_cart_badge").text
+    assert cart_count == "1"
+
+    print("✅ Test 2 Passed: Add to cart successful")
+
+# --------------------------
+# TEST 3: CHECKOUT
+# --------------------------
+def test_checkout():
+    login()
+
+    # Add item
+    wait.until(
+        EC.element_to_be_clickable((By.ID, "add-to-cart-sauce-labs-bike-light"))
+    ).click()
+
+    # Go to cart
+    driver.find_element(By.CLASS_NAME, "shopping_cart_link").click()
+
+    wait.until(EC.element_to_be_clickable((By.ID, "checkout"))).click()
+
+    wait.until(EC.presence_of_element_located((By.ID, "first-name"))).send_keys("John")
+    driver.find_element(By.ID, "last-name").send_keys("Doe")
+    driver.find_element(By.ID, "postal-code").send_keys("12345")
+    driver.find_element(By.ID, "continue").click()
+
+    wait.until(EC.element_to_be_clickable((By.ID, "finish"))).click()
+
+    confirmation = wait.until(
+        EC.presence_of_element_located((By.CLASS_NAME, "complete-header"))
+    )
+
+    assert "Thank you" in confirmation.text
+    print("✅ Test 3 Passed: Checkout successful")
+
+# --------------------------
+# TEST 4: LOGOUT
+# --------------------------
+def test_logout():
+    login()
+
+    wait.until(
+        EC.element_to_be_clickable((By.ID, "react-burger-menu-btn"))
+    ).click()
+
+    wait.until(
+        EC.element_to_be_clickable((By.ID, "logout_sidebar_link"))
+    ).click()
+
+    wait.until(EC.presence_of_element_located((By.ID, "login-button")))
+
+    assert "saucedemo" in driver.current_url
+    print("✅ Test 4 Passed: Logout successful")
+
+# --------------------------
+# RUN ALL TESTS
+# --------------------------
+try:
+    test_login()
+    test_add_to_cart()
+    test_checkout()
+    test_logout()
+finally:
+    driver.quit()
