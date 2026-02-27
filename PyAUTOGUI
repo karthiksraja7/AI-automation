@@ -1,0 +1,13 @@
+Automating Email Sending using PyAutoGUI (Python)
+Today I built a simple automation using Python to open Gmail and send an email automatically using PyAutoGUI.
+Automate the following steps:
+1.	Open Gmail in browser
+2.	Click Compose
+3.	Enter recipient email
+4.	Add subject & body
+5.	Send the email
+Tools Used:
+1.	Python
+2.	pyautogui
+3.	pyperclip
+4.	webbrowser module
