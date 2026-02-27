@@ -11,3 +11,52 @@ Tools Used:
 2.	pyautogui
 3.	pyperclip
 4.	webbrowser module
+
+import pyautogui
+import time
+import webbrowser
+import pyperclip
+
+# Enable failsafe (Move mouse to top-left corner to stop script)
+pyautogui.FAILSAFE = True
+
+# Step 1: Open Gmail
+webbrowser.open("https://mail.google.com/")
+time.sleep(12)  # Wait for Gmail to load
+
+# Step 2: Focus browser window
+pyautogui.click(pyautogui.size()[0]//2, pyautogui.size()[1]//2)
+time.sleep(2)
+
+# Step 3: Press 'C' to Compose (Keyboard shortcut must be enabled in Gmail)
+pyautogui.press('c')
+time.sleep(3)
+
+# Step 4: Enter recipient
+pyperclip.copy("karthiksraja7@gmail.com")
+pyautogui.hotkey("ctrl", "v")
+time.sleep(1)
+pyautogui.press("tab")
+
+# Step 5: Enter Subject
+pyperclip.copy("Test Mail from PyAutoGUI")
+pyautogui.hotkey("ctrl", "v")
+time.sleep(1)
+pyautogui.press("tab")
+
+# Step 6: Enter Body
+body = """Hi,
+
+This is an automated email sent using PyAutoGUI.
+
+Regards,
+Python Automation
+"""
+pyperclip.copy(body)
+pyautogui.hotkey("ctrl", "v")
+time.sleep(2)
+
+# Step 7: Send Email
+pyautogui.hotkey("ctrl", "enter")
+
+print("Email Sent Successfully!")
