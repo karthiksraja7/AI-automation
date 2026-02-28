@@ -1,0 +1,81 @@
+import streamlit as st
+import pandas as pd
+import io
+
+st.set_page_config(page_title="Excel Analysis Dashboard", layout="wide")
+
+st.title("📊 Excel Analysis & Editing Dashboard")
+
+# 1️⃣ Upload Excel File
+uploaded_file = st.file_uploader("Upload Excel File", type=["xlsx"])
+
+if uploaded_file is not None:
+
+    # Read Excel file
+    excel_file = pd.ExcelFile(uploaded_file)
+    
+    # 4️⃣ Select Specific Sheet
+    sheet_name = st.selectbox("Select Sheet", excel_file.sheet_names)
+    
+    df = pd.read_excel(excel_file, sheet_name=sheet_name)
+
+    st.success(f"Loaded Sheet: {sheet_name}")
+
+    # Display basic info
+    st.subheader("📌 Dataset Overview")
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Rows", df.shape[0])
+    col2.metric("Columns", df.shape[1])
+    col3.metric("Missing Values", df.isnull().sum().sum())
+
+    st.divider()
+
+    # 4️⃣ Dropdown to Select Schema (Column Filter)
+    st.subheader("🔍 Select Parameter (Column) to Analyze")
+    selected_column = st.selectbox("Select Column", df.columns)
+
+    if selected_column:
+        st.write(f"### Details for: {selected_column}")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.write("Data Type:", df[selected_column].dtype)
+            st.write("Unique Values:", df[selected_column].nunique())
+            st.write("Missing Values:", df[selected_column].isnull().sum())
+
+        with col2:
+            if pd.api.types.is_numeric_dtype(df[selected_column]):
+                st.write("Statistics:")
+                st.write(df[selected_column].describe())
+                st.bar_chart(df[selected_column])
+            else:
+                value_counts = df[selected_column].value_counts()
+                st.write("Top Values:")
+                st.write(value_counts.head())
+                st.bar_chart(value_counts.head())
+
+    st.divider()
+
+    # 2️⃣ Edit Excel Data
+    st.subheader("✏️ Edit Data")
+    edited_df = st.data_editor(df, num_rows="dynamic")
+
+    # 3️⃣ Save Back to Excel
+    if st.button("💾 Save Changes"):
+        output = io.BytesIO()
+        edited_df.to_excel(output, index=False, engine='openpyxl')
+        st.session_state["modified_file"] = output.getvalue()
+        st.success("Changes Saved Successfully!")
+
+    # 5️⃣ Download Modified Excel File
+    if "modified_file" in st.session_state:
+        st.download_button(
+            label="⬇️ Download Modified Excel File",
+            data=st.session_state["modified_file"],
+            file_name=f"modified_{sheet_name}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+else:
+    st.info("Please upload an Excel file to begin analysis.")
